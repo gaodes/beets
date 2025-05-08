@@ -1,0 +1,51 @@
+# Playlists library configuration
+# This is a separate library specifically for playlists
+
+# Library settings for playlists
+# To use this specific library: beet -c /config/playlists.yaml [command]
+library: /config/playlists.db             # Separate database for playlists
+directory: /data/media/music/playlists          # Playlists directory
+
+# Plugin configuration specific to playlists
+plugins:
+  - smartplaylist                          # Generate automatic playlists
+  - random                                 # Random songs from the library
+  - fetchart                               # Fetch album art
+  - info                                   # Show file info
+  - lastgenre                            # Get genres from Last.fm
+  - acousticbrainz                       # Additional metadata from AcousticBrainz
+  - discogs                              # Get metadata from Discogs
+  - embedart                             # Embed album art in files
+  - convert                              # Convert audio files
+  - edit                                 # Edit metadata
+  
+# Smart playlist configuration
+smartplaylist:
+  auto: yes                                # Generate playlists automatically
+  relative_to: /data/media/music/playlists       # Path is relative to this directory
+  playlist_dir: /data/media/music/playlists      # Where to create playlist files
+  playlists:
+    - name: 'favorites.m3u'
+      query: ['rating:5']
+    - name: 'recent.m3u'
+      query: ['added:-30d..']
+    - name: 'rock.m3u'
+      query: ['genre:rock']
+
+# Custom path formats for playlists library
+paths:
+  default: Playlists/$genre/$artist/$album%aunique{}/$track $title
+  singleton: Playlists/Singles/$artist/$title
+
+# Import settings specific to playlists
+import:
+  write: yes
+  move: yes
+  resume: ask
+  log: /config/playlists_import.log
+  incremental: yes
+  default_action: apply                   # Default action for imports
+  copy: no                                # Don't copy, just move
+  from_scratch: no                        # Don't delete existing metadata
+  quiet_fallback: skip                    # Skip items that can't be matched
+  timid: no     

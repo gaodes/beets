@@ -1,0 +1,69 @@
+# Albums library configuration
+# This is a specialized configuration for managing your album collection
+
+# Library settings for albums
+# To use this specific library: beet -c /config/albums.yaml [command]
+library: /config/albums.db               # Separate database for albums
+directory: /data/media/music/albums            # Albums directory
+
+# Plugin configuration specific to albums
+plugins:
+  - fetchart                             # Fetch album art
+  - lastgenre                            # Get genres from Last.fm
+  - info                                 # Show file info
+  - acousticbrainz                       # Additional metadata from AcousticBrainz
+  - discogs                              # Get metadata from Discogs
+  - embedart                             # Embed album art in files
+  - convert                              # Convert audio files
+  - edit                                 # Edit metadata
+
+# Album-specific plugin configurations
+fetchart:
+  auto: yes                               # Fetch art automatically
+  sources:
+    - filesystem
+    - coverart
+    - itunes
+    - amazon
+    - albumart
+    - discogs
+  maxwidth: 1500                          # Higher resolution for album art
+
+lastgenre:
+  count: 3                                # Number of genres to fetch
+  fallback: 'Unknown'                     # Default genre if none found
+  source: album                           # Use album-level genre info
+
+embedart:
+  auto: yes                               # Automatically embed art
+  maxwidth: 1500                          # Maximum art width to embed
+  remove_art_file: no                     # Keep separate art files
+
+convert:
+  auto: no                                # Don't convert automatically
+  dest: /data/music/converted             # Destination for converted files
+  format: mp3                             # Target format
+  formats:
+    mp3:
+      command: ffmpeg -i $source -y -vn -aq 2 $dest
+      extension: mp3
+
+# Custom paths specifically for albums
+paths:
+  default: $albumartist/$album%aunique{}/$track $title
+  singleton: Singles/$artist/$title
+  comp: Compilations/$album%aunique{}/$track $title
+  albumtype:soundtrack: Soundtracks/$album%aunique{}/$track $title
+
+# Import settings for albums
+import:
+  write: yes                              # Write metadata to files
+  move: yes                               # Move files to library
+  resume: ask                             # Resume interrupted imports
+  log: /config/albums_import.log          # Log import activity
+  incremental: yes                        # Skip already-imported directories
+  default_action: apply                   # Default action for imports
+  copy: no                                # Don't copy, just move
+  from_scratch: no                        # Don't delete existing metadata
+  quiet_fallback: skip                    # Skip items that can't be matched
+  timid: no                               # Don't be too careful with matches

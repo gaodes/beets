@@ -1,0 +1,19 @@
+---
+
+services:
+  beets:
+    image: gaodes/beets:latest
+    container_name: beets
+    volumes:
+      - ./config:/config              # Configuration directory
+      - /mnt/user/mediabox:/data      # Main data volume
+    environment:
+      - PUID=99                       # Unraid user ID
+      - PGID=100                      # Unraid group ID
+      - TZ=UTC                        # Timezone (change as needed)
+    ports:
+      - "8337:8337"                   # For web plugin (if enabled)
+    restart: unless-stopped
+    # Override the default command if needed
+    # For example, to run the web interface:
+    # command: beet web
