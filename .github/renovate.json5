@@ -47,22 +47,27 @@
     {
       "fileMatch": ["^Dockerfile$"],
       "matchStrings": [
-        "\\s+(?<depName>[\\w-]+)=(?<currentValue>[\\d.]+(?:-r\\d+)?)"
+        "\\s+(?<depName>[\\w-]+)~=(?<currentValue>[\\d.]+(?:-r\\d+)?)"
       ],
       "datasourceTemplate": "repology",
       "registryUrlTemplate": "https://pkgs.alpinelinux.org",
+      "lookupNameTemplate": "alpine_3_18/{{depName}}",
       "depTypeTemplate": "alpine-package"
     },
     {
       "fileMatch": ["^Dockerfile$"],
       "matchStrings": [
-        "pip install --no-cache-dir[^\\n]*\\n(?<package>\\s+[^\\s#]+==(?<currentValue>[^\\s]+)\\s*)"
+        "ENV [^\\n]*\\b(?<depName>\\w+)=(?<currentValue>\\d+)\\b"
       ],
-      "datasourceTemplate": "pypi",
-      "lookupNameTemplate": "{{package}}",
-      "depNameTemplate": "{{package}}",
-      "packageNameTemplate": "{{package}}",
-      "extractVersionTemplate": "{{currentValue}}"
+      "datasourceTemplate": "docker",
+      "depTypeTemplate": "env-variable"
+    },
+    {
+      "fileMatch": ["^Dockerfile$"],
+      "matchStrings": [
+        "pip install --no-cache-dir[^\\n]*\\s+(?<depName>[^\\s#=]+)==(?<currentValue>[^\\s]+)"
+      ],
+      "datasourceTemplate": "pypi"
     }
   ]
 }
