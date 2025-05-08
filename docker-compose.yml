@@ -1,8 +1,8 @@
----
+version: '3.8'
 
 services:
   beets:
-    image: gaodes/beets:latest
+    image: ghcr.io/gaodes/beets:latest
     container_name: beets
     volumes:
       - ./config:/config              # Configuration directory
@@ -14,6 +14,48 @@ services:
     ports:
       - "8337:8337"                   # For web plugin (if enabled)
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "beet", "version"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 20s
     # Override the default command if needed
     # For example, to run the web interface:
-    # command: beet web
+    command: beet web
+    
+    # Add resource limits to prevent container from using too many resources
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+
+  # Add a web UI for easier management of your music library
+  # Uncomment if you want to use Beets Web (different from beets web plugin)
+  # beetsweb:
+  #   image: linuxserver/beets-web:latest
+  #   container_name: beetsweb
+  #   depends_on:
+  #     - beets
+  #   ports:
+  #     - "8080:80"
+  #   volumes:
+  #     - ./config:/config
+  #     - /mnt/user/mediabox:/data
+  #   restart: unless-stopped
+  #   environment:
+  #     - PUID=99
+  #     - PGID=100
+  #     - TZ=UTC
+
+networks:
+  default:
+    name: beets_network
+
+# Add named volumes for better data management
+volumes:
+  config:
+    driver: local
+  data:
+    driver: local

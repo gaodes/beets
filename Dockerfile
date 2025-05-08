@@ -1,3 +1,65 @@
+FROM python:3.11-alpine AS builder
+
+# Install build dependencies
+RUN apk add --no-cache \
+    build-base \
+    libffi-dev \
+    chromaprint-dev \
+    imagemagick-dev \
+    py3-pip \
+    git \
+    cmake \
+    taglib-dev \
+    boost-dev \
+    fftw-dev
+
+# Install Python packages
+RUN pip install --no-cache-dir --prefix=/install \
+    beets==2.3.0 \
+    # Core plugins
+    pylast==5.5.0 \
+    pyacoustid==1.3.0 \
+    python-acoustid==1.3.0 \
+    # Enhanced metadata
+    discogs-client==2.7.0 \
+    musicbrainzngs==0.7.1 \
+    bandcamp-api==0.6.0 \
+    # Audio analysis
+    keyfinder-cli==1.2.2 \
+    librosa==0.10.1 \
+    # Integration
+    flask==3.1.0 \
+    plexapi==4.15.4 \
+    plex-api==4.2.0 \
+    # General dependencies
+    requests==2.32.3 \
+    mutagen==1.47.0 \
+    beautifulsoup4==4.12.3 \
+    confuse==2.0.1 \
+    reflink==0.2.1 \
+    mpd2==3.1.0 \
+    rarfile==4.1 \
+    jellyfish==1.0.1 \
+    pillow==10.2.0 \
+    pyxdg==0.28 \
+    pyyaml==6.0.1 \
+    typing-extensions==4.8.0 \
+    responses==0.24.1 \
+    xmltodict==0.13.0 \
+    mediafile==0.12.0 \
+    unidecode==1.3.7 \
+    munkres==1.1.4 \
+    # Additional plugin dependencies
+    beets-bandcamp==0.1.4 \
+    beets-beatport==0.1.1 \
+    beets-extrafiles==0.0.7 \
+    beets-alternatives==0.10.1 \
+    beets-smartplaylist==0.2.0 \
+    beets-albumtypes==0.1.5 \
+    beets-yearfixer==0.0.5 \
+    beets-copyartifacts==0.1.3
+
+# Final image
 FROM python:3.11-alpine
 
 # Set labels for the image
@@ -13,47 +75,39 @@ ENV BEETSDIR="/config" \
     PGID=100 \
     TZ=UTC
 
-# Install essential build dependencies, beets dependencies, and common tools
-# You can customize this list based on the plugins you intend to use
+# Install runtime dependencies
 RUN apk add --no-cache \
-    build-base \
-    # For beets core & general plugins
-    ffmpeg=4.4.2-r0 \
-    flac=1.4.2-r0 \
-    lame=3.100-r0 \
-    libffi-dev=3.4.4-r0 \
-    # For chromaprint/acousticid
-    chromaprint=1.5.1-r0 \
-    chromaprint-dev=1.5.1-r0 \
-    # For image manipulation (e.g., embedart plugin)
-    imagemagick=7.1.0-r5 \
-    imagemagick-dev=7.1.0-r5 \
-    # Common tools
-    nano=5.9-r0 \
-    sqlite=3.40.1-r0 \
-    su-exec=0.2-r1 \
-    shadow=4.13-r0 \
-    # Add other specific dependencies for your chosen plugins here
-    && pip install --no-cache-dir \
-    beets==2.3.0 \
-    # Add your desired beets plugins here with pinned versions
-    pylast==5.5.0 \
-    pyacoustid==1.3.0 \
-    requests==2.32.3 \
-    # For playlist management
-    beets-smartplaylist==0.2.0 \
-    # For web interface
-    flask==3.1.0 \
-    # Additional plugins from config files - update versions as needed
-    discogs-client==2.7.0 \
-    musicbrainzngs==0.7.1 \
-    mutagen==1.47.0 \
-    beautifulsoup4==4.12.3 \
-    && apk del build-base \
-    && rm -rf /var/cache/apk/*
+    ffmpeg \
+    flac \
+    lame \
+    opus-tools \
+    chromaprint \
+    imagemagick \
+    nano \
+    sqlite \
+    su-exec \
+    shadow \
+    tzdata \
+    mpd \
+    mpc \
+    unrar \
+    mp3gain \
+    py3-pip \
+    git \
+    fftw \
+    taglib \
+    boost \
+    sox \
+    keyfinder \
+    curl \
+    jq \
+    && pip install --no-cache-dir aubio
 
-# Create necessary directories
-RUN mkdir -p /config /data/music/albums /data/music/playlists /data/downloads
+# Copy Python packages from builder stage
+COPY --from=builder /install /usr/local
+
+# Create only the base directories
+RUN mkdir -p /config /data
 
 # Set the working directory
 WORKDIR /config
@@ -84,6 +138,10 @@ chown nobody:nobody /data\n\
 # Run the command as the nobody user\n\
 exec su-exec nobody "$@"' > /entrypoint.sh && \
     chmod +x /entrypoint.sh
+
+# Add healthcheck
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD beet version || exit 1
 
 # Expose the default beets web UI port
 EXPOSE 8337

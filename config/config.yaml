@@ -1,0 +1,287 @@
+directory: /data/media/music/albums
+library: /config/library.db
+pluginpath: /config/plugins
+threaded: yes
+
+paths:
+  default: $albumartist/$album%aunique{}/$track $title
+  singleton: Non-Album/$artist/$title
+  comp: Compilations/$album%aunique{}/$track $title
+
+import:
+  copy: yes
+  write: yes
+  log: /config/import.log
+  incremental: yes
+  resume: ask
+  quiet_fallback: skip
+  timid: no
+  duplicate_action: ask
+
+match:
+  preferred:
+    countries: ['US', 'GB|UK']
+    media: ['CD', 'Digital Media|File']
+    original_year: yes
+
+plugins:
+  # Core organization
+  - fetchart
+  - embedart
+  - lastgenre
+  - chroma
+  - types
+  - importadded
+  
+  # Enhanced metadata
+  - acousticbrainz
+  - lyrics
+  - discogs
+  - albumtypes
+  - bandcamp
+  - beatport
+  - creditflags
+  
+  # Audio analysis
+  - keyfinder
+  - acoustid
+  - bpm
+  - replaygain
+  
+  # Library management
+  - duplicates
+  - missing
+  - zero
+  - edit
+  - info
+  - scrub
+  - fromfilename
+  - filefilter
+  - extrafiles
+  
+  # Integration
+  - web
+  - plexupdate
+  - alternatives
+  - smartplaylist
+  - playlist
+  - hook
+  
+  # Conversion and processing
+  - convert
+  - inline
+
+# Core organization plugins
+fetchart:
+  auto: yes
+  sources:
+    - filesystem
+    - coverart: release
+    - itunes
+    - amazon
+    - albumart
+  minwidth: 500
+  maxwidth: 1500
+  enforce_ratio: yes
+  cautious: true
+
+embedart:
+  auto: yes
+  ifempty: yes
+  maxwidth: 1000
+  remove_art_file: no
+
+lastgenre:
+  auto: yes
+  count: 3
+  fallback: 'Unknown'
+  force: no
+  min_weight: 10
+  source: album
+  whitelist: /config/genres.txt
+
+chroma:
+  auto: yes
+
+types:
+  artist_credit: text
+  albumartist_credit: text
+  
+importadded:
+  preserve_mtimes: yes
+
+# Enhanced metadata plugins
+acousticbrainz:
+  auto: yes
+  force: no
+  tags: bpm key
+
+lyrics:
+  auto: yes
+  sources:
+    - genius
+    - lyricscom
+    - lyricwiki
+    - musixmatch
+
+discogs:
+  source_weight: 0.5
+  user_token: 
+
+albumtypes:
+  types: [album, ep, single, compilation, soundtrack, live, remix, other]
+  ignore_va: no
+
+bandcamp:
+  auto: yes
+  search: yes
+  art: yes
+  
+beatport:
+  source_weight: 0.5
+
+creditflags:
+  auto: yes
+  albumartist: [album_performer]
+  artist: [track_performer]
+
+# Audio analysis plugins
+keyfinder:
+  auto: yes
+  bin: /usr/bin/keyfinder
+  
+acoustid:
+  auto: yes
+
+bpm:
+  auto: yes
+  min_bpm: 60
+  max_bpm: 240
+  max_stripes: 5
+  
+replaygain:
+  auto: no
+  backend: command
+  overwrite: yes
+  targetlevel: 89
+
+# Library management plugins
+duplicates:
+  album: no
+  checksum: no
+  count: yes
+  delete: no
+  format: format album artist title
+  keys: album artist
+  merge: no
+  path: yes
+  tiebreak: albumartist+ album+ year+ month+ day+
+
+missing:
+  count: yes
+  format: $album - $artist - $title
+  total: no
+
+zero:
+  auto: yes
+  fields: comments
+  update_database: yes
+
+edit:
+  itemfields: album artist albumartist title track disc
+  albumfields: album albumartist
+
+info:
+  summarize: yes
+  
+scrub:
+  auto: no
+
+fromfilename:
+  cautious: yes
+  
+filefilter:
+  extensions: .mp3 .flac .m4a .ogg .opus
+  ignore_hidden: yes
+  
+extrafiles:
+  patterns: 
+    lyrics: 
+      - "*.lrc"
+      - "*.txt"
+    image: 
+      - "*.jpg"
+      - "*.png"
+  paths:
+    lyrics: $albumpath/$title
+    image: $albumpath/artwork
+
+# Integration plugins
+web:
+  host: 0.0.0.0
+  port: 8337
+  cors: '*'
+  reverse_proxy: no
+
+plexupdate:
+  library_name: Music
+  server: http://localhost:32400
+  token: 
+  auto: yes
+
+alternatives:
+  baseplate: default
+  modes:
+    lossless:
+      directory: /data/media/music/lossless
+      formats: flac aiff
+    lossy:
+      directory: /data/media/music/lossy
+      formats: mp3 aac
+
+smartplaylist:
+  auto: yes
+  playlist_dir: /data/media/music/playlists
+  relative_to: /data/media/music
+  playlists:
+    - name: 'all.m3u'
+      query: ''
+    - name: 'recently_added.m3u'
+      query: 'added:-30d..'
+
+playlist:
+  auto: no
+  playlist_dir: /data/media/music/playlists
+  relative_to: /data/media/music
+
+hook:
+  hooks:
+    - event: album_imported
+      command: echo "Album $albumartist - $album imported"
+
+# Conversion and processing plugins
+convert:
+  dest: /data/media/music/converted
+  format: mp3
+  formats:
+    mp3:
+      command: ffmpeg -i $source -y -vn -aq 2 $dest
+      extension: mp3
+    opus:
+      command: ffmpeg -i $source -y -vn -acodec libopus -b:a 128k $dest
+      extension: opus
+
+inline:
+  tag_patterns:
+    media: media
+    genre: genre
+    year: year
+    country: country
+    label: label
+    catalognumber: ^cat
+    albumdisambig: albumdisambig
+    disc: disc
+    disctitle: disctitle
+    artist_credit: artist_credit
+    albumartist_credit: albumartist_credit
+    comp: comp
