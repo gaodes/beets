@@ -1,25 +1,29 @@
-FROM python:3.11-alpine AS builder
+FROM python:3.12-alpine AS builder
+
+# Setup pip cache for faster builds
+ENV PIP_CACHE_DIR=/var/cache/pip
+RUN mkdir -p $PIP_CACHE_DIR
 
 # Install build dependencies
 RUN apk add --no-cache \
-    build-base \
-    libffi-dev \
-    chromaprint-dev \
-    imagemagick-dev \
-    py3-pip \
-    git \
-    cmake \
-    taglib-dev \
-    boost-dev \
-    fftw-dev
+    build-base~=0.5 \
+    libffi-dev~=3.4 \
+    chromaprint-dev~=1.5 \
+    imagemagick-dev~=7.1 \
+    py3-pip~=23.0 \
+    git~=2.40 \
+    cmake~=3.27 \
+    taglib-dev~=1.13 \
+    boost-dev~=1.82 \
+    fftw-dev~=3.3
 
 # Install Python packages
+# NOTE: The beets version line below is the source of truth and is updated by Renovate
 RUN pip install --no-cache-dir --prefix=/install \
     beets==2.3.0 \
     # Core plugins
     pylast==5.5.0 \
     pyacoustid==1.3.0 \
-    python-acoustid==1.3.0 \
     # Enhanced metadata
     discogs-client==2.7.0 \
     musicbrainzngs==0.7.1 \
@@ -30,7 +34,6 @@ RUN pip install --no-cache-dir --prefix=/install \
     # Integration
     flask==3.1.0 \
     plexapi==4.15.4 \
-    plex-api==4.2.0 \
     # General dependencies
     requests==2.32.3 \
     mutagen==1.47.0 \
@@ -54,18 +57,32 @@ RUN pip install --no-cache-dir --prefix=/install \
     beets-beatport==0.1.1 \
     beets-extrafiles==0.0.7 \
     beets-alternatives==0.10.1 \
-    beets-smartplaylist==0.2.0 \
     beets-albumtypes==0.1.5 \
     beets-yearfixer==0.0.5 \
-    beets-copyartifacts==0.1.3
+    beets-copyartifacts==0.1.3 \
+    # Additional requested plugins
+    beets-creditflags==0.0.1 \
+    beets-keyfinder==0.4.0 \
+    beets-metasync==0.1.0 \
+    beets-playlistensure==0.1.0 \
+    beets-rewritestyles==0.1.0 \
+    beets-fetchattrs==0.1.1 \
+    beets-describe==0.0.5 \
+    beets-audiofeatures==0.3.1 \
+    beets-djtools==0.1.1 \
+    beets-xtractor==0.5.0 \
+    # Recommended additional plugins
+    beets-autofix==0.1.3 \
+    beets-follow==0.1.2 \
+    beets-originquery==0.1.1 \
+    beets-check==0.12.0 \
+    # Supporting libraries
+    spotipy==2.23.0 \
+    py-sonic==1.0.0 \
+    essentia==2.1b6.dev1234
 
 # Final image
-FROM python:3.11-alpine
-
-# Set labels for the image
-LABEL maintainer="gaodes"
-LABEL org.opencontainers.image.source="https://github.com/gaodes/beets"
-LABEL org.opencontainers.image.description="Lightweight Docker image for beets music organizer"
+FROM python:3.12-alpine
 
 # Set environment variables
 ENV BEETSDIR="/config" \
@@ -75,36 +92,51 @@ ENV BEETSDIR="/config" \
     PGID=100 \
     TZ=UTC
 
-# Install runtime dependencies
+# Install runtime dependencies with version pinning
 RUN apk add --no-cache \
-    ffmpeg \
-    flac \
-    lame \
-    opus-tools \
-    chromaprint \
-    imagemagick \
-    nano \
-    sqlite \
-    su-exec \
-    shadow \
-    tzdata \
-    mpd \
-    mpc \
-    unrar \
-    mp3gain \
-    py3-pip \
-    git \
-    fftw \
-    taglib \
-    boost \
-    sox \
-    keyfinder \
-    curl \
-    jq \
-    && pip install --no-cache-dir aubio
+    ffmpeg~=6.0 \
+    flac~=1.4 \
+    lame~=3.100 \
+    opus-tools~=0.2 \
+    chromaprint~=1.5 \
+    imagemagick~=7.1 \
+    nano~=7.2 \
+    sqlite~=3.43 \
+    su-exec~=0.2 \
+    shadow~=4.13 \
+    tzdata~=2023 \
+    mpd~=0.23 \
+    mpc~=0.34 \
+    unrar~=6.2 \
+    mp3gain~=1.6 \
+    py3-pip~=23.0 \
+    git~=2.40 \
+    fftw~=3.3 \
+    taglib~=1.13 \
+    boost~=1.82 \
+    sox~=14.4 \
+    keyfinder~=2.2 \
+    curl~=8.4 \
+    jq~=1.7 \
+    && pip install --no-cache-dir aubio==0.4.9
 
 # Copy Python packages from builder stage
 COPY --from=builder /install /usr/local
+
+# Extract Beets version directly after installation
+RUN BEETS_VERSION=$(pip show beets | grep "^Version:" | cut -d " " -f 2) && \
+    echo "Beets version: ${BEETS_VERSION}"
+
+# Set labels for the image with improved metadata
+LABEL maintainer="gaodes" \
+      org.opencontainers.image.source="https://github.com/gaodes/beets" \
+      org.opencontainers.image.description="Feature-rich Docker image for beets music organizer with comprehensive plugin support" \
+      org.opencontainers.image.version="${BEETS_VERSION}" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.created="$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
+      org.opencontainers.image.title="Beets Music Organizer" \
+      org.opencontainers.image.vendor="gaodes" \
+      org.opencontainers.image.base.name="python:3.12-alpine"
 
 # Create only the base directories
 RUN mkdir -p /config /data
@@ -139,8 +171,8 @@ chown nobody:nobody /data\n\
 exec su-exec nobody "$@"' > /entrypoint.sh && \
     chmod +x /entrypoint.sh
 
-# Add healthcheck
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+# Add healthcheck with improved parameters
+HEALTHCHECK --interval=60s --timeout=10s --start-period=30s --retries=3 \
   CMD beet version || exit 1
 
 # Expose the default beets web UI port
@@ -148,7 +180,7 @@ EXPOSE 8337
 
 # Set entrypoint and default command
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["beet", "version"]
+CMD ["beet", "web"]
 
 # Define volumes for persistent configuration and library data
 VOLUME ["/config", "/data"]

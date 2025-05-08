@@ -66,10 +66,21 @@ plugins:
   - smartplaylist
   - playlist
   - hook
+  - subsonicupdate
+  - playlistensure
+  - metasync
   
   # Conversion and processing
   - convert
   - inline
+  - rewritestyles
+  
+  # Additional plugins
+  - fetchattrs
+  - describe
+  - audiofeatures
+  - djtools
+  - xtractor
 
 # Core organization plugins
 fetchart:
@@ -259,6 +270,27 @@ hook:
     - event: album_imported
       command: echo "Album $albumartist - $album imported"
 
+subsonicupdate:
+  auto: yes
+  server: http://localhost:4040
+  username: admin
+  password: password
+
+playlistensure:
+  playlist_dir: /data/media/music/playlists
+  playlist_extension: .m3u
+  relative_to: /data/media/music
+  playlists:
+    - name: punk
+      query: 'genre:punk'
+    - name: electronic
+      query: 'genre:electronic'
+
+metasync:
+  source: lastfm
+  auto: yes
+  dry_run: no
+
 # Conversion and processing plugins
 convert:
   dest: /data/media/music/converted
@@ -285,3 +317,74 @@ inline:
     artist_credit: artist_credit
     albumartist_credit: albumartist_credit
     comp: comp
+
+rewritestyles:
+  auto: yes
+  capitalization: title
+  upper_words: ['DJ', 'UK', 'US', 'EP', 'LP', 'CD', 'MTV', 'OS', 'IT', 'AC', 'DC']
+  lower_words: ['a', 'an', 'the', 'vs', 'vs.', 'feat', 'feat.']
+  styles:
+    - match: '\(.*[Rr][Ee][Mm][Ii][Xx].*\)'
+      style: '(Remix)'
+    - match: '\(.*[Ee][Dd][Ii][Tt].*\)'
+      style: '(Edit)'
+
+fetchattrs:
+  auto: yes
+  source: spotify
+  client_id: 
+  client_secret: 
+  features: ['energy', 'danceability', 'valence', 'acousticness']
+  fetch_album_attrs: yes
+
+describe:
+  auto: no
+  tag_patterns:
+    artist: '^artist$'
+    title: '^title$'
+    album: '^album$'
+
+audiofeatures:
+  auto: yes
+  write: yes
+  overwrite: no
+  source: spotify
+  client_id: 
+  client_secret: 
+
+djtools:
+  auto: yes
+  key_include: yes
+  key_tag: initial_key
+  bpm_include: yes
+  energy_include: yes
+  include_low_energy: no
+  playlists:
+    intro:
+      bpm_range: [80, 100]
+      energy_range: [0.5, 0.8]
+      comment: 'Good for set intro'
+    peak:
+      bpm_range: [120, 140]
+      energy_range: [0.8, 1.0]
+      comment: 'High energy tracks'
+
+xtractor:
+  auto: yes
+  dry_run: no
+  force: no
+  threads: 2
+  write: yes
+  keep_output: no
+  audio_files: 
+    - mp3
+    - flac
+    - m4a
+    - ogg
+  features:
+    - bpm
+    - key
+    - danceable
+    - aggressive
+    - voice
+    - acoustic

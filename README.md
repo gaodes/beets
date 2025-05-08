@@ -1,15 +1,20 @@
 # Beets Docker Setup
 
-A lightweight Docker container setup for [Beets](https://beets.io/), the music library manager and tagger.
+A feature-rich Docker container setup for [Beets](https://beets.io/), the music library manager and tagger, with comprehensive plugin support.
 
 ## Features
 
-- Multi-stage Docker build for smaller image size
+- Multi-stage Docker build for optimized image size
 - Automatic version detection and tagging
-- Comprehensive configuration with common plugins
+- Comprehensive configuration with 40+ plugins
 - Resource-limited containers to prevent overuse
 - Health checks for better container management
 - Support for PUID/PGID for proper file permissions (NAS/Unraid friendly)
+- Automatic updates via Renovate integration
+- Extensive plugin collection for advanced music library management
+- Multi-source metadata lookup (MusicBrainz, Discogs, Bandcamp, etc.)
+- Audio analysis tools (BPM detection, key finding, ReplayGain)
+- Integration with Plex and other media servers
 
 ## Quick Start
 
@@ -42,6 +47,56 @@ Edit the configuration files in the `config/` directory:
   - `/data/downloads/youtube`: Music downloaded from YouTube
   - `/data/downloads/spotify`: Music downloaded from Spotify
 
+## Included Plugins
+
+This Docker image includes a comprehensive set of Beets plugins:
+
+### Core Organization
+- **fetchart**: Download album art images and attach them to your albums
+- **embedart**: Embed album art images into file metadata
+- **lastgenre**: Fetch genres from Last.fm
+- **chroma**: Audio fingerprinting for accurate identification
+- **types**: Custom field types for your music library
+- **importadded**: Preserve file modification times during import
+
+### Enhanced Metadata
+- **acousticbrainz**: Fetch acoustic information from AcousticBrainz
+- **lyrics**: Automatically fetch song lyrics
+- **discogs**: Use Discogs as a metadata source
+- **albumtypes**: Consistent album type classification
+- **bandcamp**: Use Bandcamp as a metadata source
+- **beatport**: Use Beatport as a metadata source
+- **creditflags**: Credit handling for performers
+
+### Audio Analysis
+- **keyfinder**: Detect musical key of tracks
+- **acoustid**: Audio fingerprinting using the Acoustid service
+- **bpm**: Tempo (beats per minute) detection
+- **replaygain**: Calculate and store ReplayGain values
+
+### Library Management
+- **duplicates**: Find and manage duplicate tracks
+- **missing**: List missing tracks from albums
+- **zero**: Cleans fields from music files
+- **edit**: Edit metadata from a text editor
+- **info**: Show file metadata
+- **scrub**: Clean extraneous metadata from files
+- **fromfilename**: Generate metadata from filenames
+- **filefilter**: Filter files during import
+- **extrafiles**: Manage non-music files
+
+### Integration
+- **web**: Web interface for your library
+- **plexupdate**: Update Plex libraries when changes occur
+- **alternatives**: Manage multiple formats of the same music
+- **smartplaylist**: Generate playlists based on queries
+- **playlist**: Maintain playlists based on queries
+- **hook**: Run commands when events occur
+
+### Conversion and Processing
+- **convert**: Convert audio files to other formats
+- **inline**: Extract embedded information from filenames
+
 ## Common Commands
 
 ```bash
@@ -66,6 +121,39 @@ docker-compose exec beets beet splupdate
 # Start web interface (if not already running)
 docker-compose exec beets beet web
 ```
+
+## Plugin Configuration
+
+Each plugin has been pre-configured in the `config.yaml` file with sensible defaults. Here are some key configurations you might want to customize:
+
+### Discogs Authentication
+```yaml
+discogs:
+  user_token: YOUR_DISCOGS_TOKEN
+```
+
+### Plex Integration
+```yaml
+plexupdate:
+  library_name: Music
+  server: http://plex:32400
+  token: YOUR_PLEX_TOKEN
+```
+
+### Last.fm Genre Configuration
+```yaml
+lastgenre:
+  whitelist: /config/genres.txt  # Create this file with your preferred genres
+```
+
+## Automatic Updates
+
+This project uses Renovate for automatic dependency updates. The Renovate configuration will:
+
+- Monitor for new versions of Beets and its dependencies
+- Create pull requests for dependency updates
+- Automatically merge non-breaking updates
+- Tag new versions based on dependency changes
 
 ## Upgrading
 
@@ -110,3 +198,7 @@ RUN pip install --no-cache-dir \
 - [Beets Documentation](https://beets.readthedocs.io/)
 - [Docker Hub Repository](https://hub.docker.com/r/gaodes/beets)
 - [GitHub Repository](https://github.com/gaodes/beets)
+
+## Contributing
+
+Contributions are welcome! Feel free to open issues or pull requests on GitHub.

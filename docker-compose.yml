@@ -5,7 +5,7 @@ services:
     image: ghcr.io/gaodes/beets:latest
     container_name: beets
     volumes:
-      - ./config:/config              # Configuration directory
+      - /mnt/user/docker/appdata/beets/config:/config              # Configuration directory
       - /mnt/user/mediabox:/data      # Main data volume
     environment:
       - PUID=99                       # Unraid user ID

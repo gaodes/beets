@@ -30,18 +30,18 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "version_changed=true" >> $GITHUB_OUTPUT
-            CURRENT_VERSION=$(grep -o 'beets==.*\\' Dockerfile | sed 's/beets==\(.*\)\\/\1/')
+            CURRENT_VERSION=$(grep -o "beets==.*" Dockerfile | head -1 | sed 's/beets==\([0-9.]*\).*/\1/')
             echo "new_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
             exit 0
           fi
           
           if [[ "${{ github.event_name }}" == "push" || "${{ github.event_name }}" == "pull_request" ]]; then
             # Get the current version
-            CURRENT_VERSION=$(grep -o 'beets==.*\\' Dockerfile | sed 's/beets==\(.*\)\\/\1/')
+            CURRENT_VERSION=$(grep -o "beets==.*" Dockerfile | head -1 | sed 's/beets==\([0-9.]*\).*/\1/')
             
             # Get the previous version from the file before the change
             git show HEAD~1:Dockerfile > Dockerfile.prev || exit 0
-            PREV_VERSION=$(grep -o 'beets==.*\\' Dockerfile.prev 2>/dev/null | sed 's/beets==\(.*\)\\/\1/' || echo "")
+            PREV_VERSION=$(grep -o "beets==.*" Dockerfile.prev 2>/dev/null | head -1 | sed 's/beets==\([0-9.]*\).*/\1/' || echo "")
             rm Dockerfile.prev
             
             # Compare versions
@@ -83,7 +83,7 @@ jobs:
           if [[ "${{ needs.check_beets_version.outputs.new_version }}" != "" ]]; then
             echo "beets_version=${{ needs.check_beets_version.outputs.new_version }}" >> $GITHUB_OUTPUT
           else
-            BEETS_VERSION=$(grep -o 'beets==.*\\' Dockerfile | sed 's/beets==\(.*\)\\/\1/')
+            BEETS_VERSION=$(grep -o "beets==.*" Dockerfile | head -1 | sed 's/beets==\([0-9.]*\).*/\1/')
             echo "beets_version=$BEETS_VERSION" >> $GITHUB_OUTPUT
           fi
 
