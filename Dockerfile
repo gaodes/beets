@@ -1,4 +1,4 @@
-FROM python:3.12-alpine AS builder
+FROM python:3.13-alpine AS builder
 
 # Setup pip cache for faster builds
 ENV PIP_CACHE_DIR=/var/cache/pip
@@ -82,7 +82,7 @@ RUN pip install --no-cache-dir --prefix=/install \
     essentia==2.1b6.dev1234
 
 # Final image
-FROM python:3.12-alpine
+FROM python:3.13-alpine
 
 # Set environment variables
 ENV BEETSDIR="/config" \
