@@ -42,7 +42,7 @@ RUN pip install --no-cache-dir --prefix=/install \
     reflink==0.2.2 \
     mpd2==3.1.0 \
     rarfile==4.1 \
-    jellyfish==1.0.1 \
+    jellyfish==1.2.0 \
     pillow==10.2.0 \
     pyxdg==0.28 \
     pyyaml==6.0.2 \
