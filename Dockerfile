@@ -56,7 +56,7 @@ RUN pip install --no-cache-dir --prefix=/install \
     beets-bandcamp==0.1.4 \
     beets-beatport==0.1.1 \
     beets-extrafiles==0.0.7 \
-    beets-alternatives==0.10.1 \
+    beets-alternatives==0.13.2 \
     beets-albumtypes==0.1.5 \
     beets-yearfixer==0.0.5 \
     beets-copyartifacts==0.1.3 \
