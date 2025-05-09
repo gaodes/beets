@@ -52,11 +52,6 @@
       "matchDatasources": ["pypi"],
       "matchUpdateTypes": ["major", "minor", "patch"],
       "enabled": true
-    },
-    {
-      "matchPackagePatterns": ["^python$"],
-      "matchDatasources": ["docker"],
-      "allowedVersions": "<3.14"
     }
   ]
 }
