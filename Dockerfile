@@ -132,20 +132,22 @@ RUN apk add --no-cache \
 # Copy Python packages from builder stage
 COPY --from=builder /install /usr/local
 
-# Extract Beets version directly after installation
+# Extract Beets version and set as build argument
+ARG BEETS_VERSION
 RUN BEETS_VERSION=$(pip show beets | grep "^Version:" | cut -d " " -f 2) && \
-    echo "Beets version: ${BEETS_VERSION}"
+    echo "Beets version: ${BEETS_VERSION}" && \
+    echo "${BEETS_VERSION}" > /tmp/beets_version
 
 # Set labels for the image with improved metadata
 LABEL maintainer="gaodes" \
       org.opencontainers.image.source="https://github.com/gaodes/beets" \
       org.opencontainers.image.description="Feature-rich Docker image for beets music organizer with comprehensive plugin support" \
-      org.opencontainers.image.version="${BEETS_VERSION}" \
+      org.opencontainers.image.version="$(cat /tmp/beets_version)" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.created="$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
       org.opencontainers.image.title="Beets Music Organizer" \
       org.opencontainers.image.vendor="gaodes" \
-      org.opencontainers.image.base.name="python:3.12-alpine"
+      org.opencontainers.image.base.name="python:3.13-alpine"
 
 # Create only the base directories
 RUN mkdir -p /config /data
