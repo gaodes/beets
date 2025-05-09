@@ -1,4 +1,4 @@
-FROM python:3.13-alpine AS builder
+FROM python:3.12-alpine AS builder
 
 # Setup pip cache for faster builds
 ENV PIP_CACHE_DIR=/var/cache/pip
@@ -19,7 +19,13 @@ RUN apk add --no-cache \
     python3-dev \
     jpeg-dev \
     zlib-dev \
-    libjpeg
+    libjpeg \
+    pkgconfig \
+    openssl-dev \
+    portaudio-dev \
+    yaml-dev \
+    linux-headers \
+    musl-dev
 
 # Install Python packages in smaller batches for better error handling
 # Core packages
@@ -36,40 +42,41 @@ RUN pip install --no-cache-dir --prefix=/install \
     confuse \
     typing-extensions
 
-# Install metadata plugins
-RUN pip install --no-cache-dir --prefix=/install \
-    pylast \
-    pyacoustid \
-    discogs-client \
-    musicbrainzngs \
-    beautifulsoup4 \
-    mpd2 \
-    flask \
-    plexapi \
-    responses \
-    xmltodict \
-    pyxdg \
-    rarfile \
-    pillow
+# Install metadata plugins one by one with verbose output
+RUN pip install --no-cache-dir --prefix=/install pylast && \
+    pip install --no-cache-dir --prefix=/install pyacoustid && \
+    pip install --no-cache-dir --prefix=/install discogs-client && \
+    pip install --no-cache-dir --prefix=/install musicbrainzngs && \
+    pip install --no-cache-dir --prefix=/install beautifulsoup4 && \
+    pip install --no-cache-dir --prefix=/install flask && \
+    pip install --no-cache-dir --prefix=/install plexapi && \
+    pip install --no-cache-dir --prefix=/install responses && \
+    pip install --no-cache-dir --prefix=/install xmltodict && \
+    pip install --no-cache-dir --prefix=/install pyxdg && \
+    pip install --no-cache-dir --prefix=/install rarfile && \
+    pip install --no-cache-dir --prefix=/install pillow && \
+    echo "Metadata plugins installed successfully"
+    
+# Try to install mpd2 separately (this might be a problematic package)
+RUN pip install --no-cache-dir --prefix=/install mpd2 || echo "Warning: mpd2 couldn't be installed"
 
-# Install Beets plugins
-RUN pip install --no-cache-dir --prefix=/install \
-    beets-bandcamp \
-    beets-beatport \
-    beets-extrafiles \
-    beets-alternatives \
-    beets-albumtypes \
-    beets-yearfixer \
-    beets-copyartifacts \
-    beets-creditflags \
-    beets-keyfinder \
-    beets-metasync \
-    beets-playlistensure \
-    beets-rewritestyles \
-    beets-fetchattrs \
-    beets-describe \
-    beets-originquery \
-    beets-check
+# Install Beets plugins one by one
+RUN pip install --no-cache-dir --prefix=/install beets-bandcamp && \
+    pip install --no-cache-dir --prefix=/install beets-beatport && \
+    pip install --no-cache-dir --prefix=/install beets-extrafiles && \
+    pip install --no-cache-dir --prefix=/install beets-alternatives && \
+    pip install --no-cache-dir --prefix=/install beets-albumtypes && \
+    pip install --no-cache-dir --prefix=/install beets-yearfixer && \
+    pip install --no-cache-dir --prefix=/install beets-copyartifacts && \
+    pip install --no-cache-dir --prefix=/install beets-creditflags && \
+    pip install --no-cache-dir --prefix=/install beets-keyfinder && \
+    pip install --no-cache-dir --prefix=/install beets-metasync && \
+    pip install --no-cache-dir --prefix=/install beets-playlistensure && \
+    pip install --no-cache-dir --prefix=/install beets-rewritestyles && \
+    pip install --no-cache-dir --prefix=/install beets-fetchattrs && \
+    pip install --no-cache-dir --prefix=/install beets-describe && \
+    pip install --no-cache-dir --prefix=/install beets-originquery && \
+    pip install --no-cache-dir --prefix=/install beets-check || echo "Warning: Some beets plugins couldn't be installed"
 
 # Try to install more complex packages with potential dependencies
 RUN pip install --no-cache-dir --prefix=/install spotipy py-sonic || echo "Warning: Some optional packages couldn't be installed"
@@ -88,7 +95,7 @@ RUN pip install --no-cache-dir --prefix=/install beets-follow || echo "Warning: 
 RUN pip install --no-cache-dir --prefix=/install essentia || echo "Warning: essentia couldn't be installed - will have reduced functionality"
 
 # Final image
-FROM python:3.13-alpine
+FROM python:3.12-alpine
 
 # Create user and group - using dynamic IDs to avoid conflicts
 RUN addgroup -S appgroup && \
