@@ -46,7 +46,7 @@ RUN pip install --no-cache-dir --prefix=/install \
     pillow==10.4.0 \
     pyxdg==0.28 \
     pyyaml==6.0.2 \
-    typing-extensions==4.8.0 \
+    typing-extensions==4.13.2 \
     responses==0.25.7 \
     xmltodict==0.13.0 \
     mediafile==0.13.0 \
