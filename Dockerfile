@@ -30,7 +30,7 @@ RUN pip install --no-cache-dir --prefix=/install \
     bandcamp-api==0.6.0 \
     # Audio analysis
     keyfinder-cli==1.2.2 \
-    librosa==0.10.1 \
+    librosa==0.11.0 \
     # Integration
     flask==3.1.0 \
     plexapi==4.15.4 \
