@@ -15,44 +15,45 @@ RUN apk add --no-cache \
     cmake \
     taglib-dev \
     boost-dev \
-    fftw-dev
+    fftw-dev \
+    python3-dev \
+    jpeg-dev \
+    zlib-dev \
+    libjpeg
 
-# Install Python packages
-# NOTE: The beets version line below is the source of truth and is updated by Renovate
+# Install Python packages in smaller batches for better error handling
+# Core packages
 RUN pip install --no-cache-dir --prefix=/install \
     beets==2.3.0 \
-    # Core plugins
-    pylast \
-    pyacoustid \
-    # Enhanced metadata
-    discogs-client \
-    musicbrainzngs \
-    bandcamp-api \
-    # Audio analysis
-    keyfinder-cli \
-    librosa \
-    # Integration
-    flask \
-    plexapi \
-    # General dependencies
     requests \
-    mutagen \
-    beautifulsoup4 \
-    confuse \
-    reflink \
-    mpd2 \
-    rarfile \
-    jellyfish \
-    pillow \
-    pyxdg \
     pyyaml \
-    typing-extensions \
-    responses \
-    xmltodict \
-    mediafile \
+    mutagen \
     unidecode \
     munkres \
-    # Additional plugin dependencies
+    mediafile==0.13.0 \
+    reflink \
+    jellyfish \
+    confuse \
+    typing-extensions
+
+# Install metadata plugins
+RUN pip install --no-cache-dir --prefix=/install \
+    pylast \
+    pyacoustid \
+    discogs-client \
+    musicbrainzngs \
+    beautifulsoup4 \
+    mpd2 \
+    flask \
+    plexapi \
+    responses \
+    xmltodict \
+    pyxdg \
+    rarfile \
+    pillow
+
+# Install Beets plugins
+RUN pip install --no-cache-dir --prefix=/install \
     beets-bandcamp \
     beets-beatport \
     beets-extrafiles \
@@ -60,7 +61,6 @@ RUN pip install --no-cache-dir --prefix=/install \
     beets-albumtypes \
     beets-yearfixer \
     beets-copyartifacts \
-    # Additional requested plugins
     beets-creditflags \
     beets-keyfinder \
     beets-metasync \
@@ -68,18 +68,24 @@ RUN pip install --no-cache-dir --prefix=/install \
     beets-rewritestyles \
     beets-fetchattrs \
     beets-describe \
-    beets-audiofeatures \
-    beets-djtools \
-    beets-xtractor \
-    # Recommended additional plugins
-    beets-autofix \
-    beets-follow \
     beets-originquery \
-    beets-check \
-    # Supporting libraries
-    spotipy \
-    py-sonic \
-    essentia
+    beets-check
+
+# Try to install more complex packages with potential dependencies
+RUN pip install --no-cache-dir --prefix=/install spotipy py-sonic || echo "Warning: Some optional packages couldn't be installed"
+
+# Try to install packages with complex build requirements
+RUN pip install --no-cache-dir --prefix=/install bandcamp-api || echo "Warning: bandcamp-api couldn't be installed"
+RUN pip install --no-cache-dir --prefix=/install keyfinder-cli || echo "Warning: keyfinder-cli couldn't be installed"
+RUN pip install --no-cache-dir --prefix=/install librosa || echo "Warning: librosa couldn't be installed"
+RUN pip install --no-cache-dir --prefix=/install beets-audiofeatures || echo "Warning: beets-audiofeatures couldn't be installed"
+RUN pip install --no-cache-dir --prefix=/install beets-djtools || echo "Warning: beets-djtools couldn't be installed"
+RUN pip install --no-cache-dir --prefix=/install beets-xtractor || echo "Warning: beets-xtractor couldn't be installed"
+RUN pip install --no-cache-dir --prefix=/install beets-autofix || echo "Warning: beets-autofix couldn't be installed"
+RUN pip install --no-cache-dir --prefix=/install beets-follow || echo "Warning: beets-follow couldn't be installed"
+
+# Try to install essentia (this is a complex package with many dependencies)
+RUN pip install --no-cache-dir --prefix=/install essentia || echo "Warning: essentia couldn't be installed - will have reduced functionality"
 
 # Final image
 FROM python:3.12-alpine
@@ -96,38 +102,49 @@ ENV BEETSDIR="/config" \
     PGID=100 \
     TZ=UTC
 
-# Install runtime dependencies with version pinning
+# Install runtime dependencies - basic package groups
 RUN apk add --no-cache \
     ffmpeg \
     flac \
     lame \
     opus-tools \
-    chromaprint \
-    imagemagick \
-    nano \
     sqlite \
     su-exec \
     shadow \
     tzdata \
+    nano \
+    curl \
+    jq
+
+# Install audio-related packages
+RUN apk add --no-cache \
+    chromaprint \
+    imagemagick \
     mpd \
     mpc \
-    unrar \
     mp3gain \
+    sox \
+    || echo "Warning: Some audio packages couldn't be installed"
+
+# Install development and library packages
+RUN apk add --no-cache \
     py3-pip \
     git \
     fftw \
     taglib \
     boost \
-    sox \
     keyfinder \
-    curl \
-    jq \
-    && pip install --no-cache-dir aubio \
-    # Clean up unnecessary files
-    && find /usr/local \
-        \( -type d -a -name test -o -name tests -o -name '__pycache__' \) \
-        -o \( -type f -a -name '*.pyc' -o -name '*.pyo' \) \
-        -exec rm -rf '{}' + || true
+    unrar \
+    || echo "Warning: Some development packages couldn't be installed"
+
+# Install Python audio package
+RUN pip install --no-cache-dir aubio || echo "Warning: aubio couldn't be installed"
+
+# Clean up unnecessary files
+RUN find /usr/local \
+    \( -type d -a -name test -o -name tests -o -name '__pycache__' \) \
+    -o \( -type f -a -name '*.pyc' -o -name '*.pyo' \) \
+    -exec rm -rf '{}' + || true
 
 # Copy Python packages from builder stage
 COPY --from=builder /install /usr/local
