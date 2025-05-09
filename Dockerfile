@@ -39,7 +39,7 @@ RUN pip install --no-cache-dir --prefix=/install \
     mutagen==1.47.0 \
     beautifulsoup4==4.12.3 \
     confuse==2.0.1 \
-    reflink==0.2.1 \
+    reflink==0.2.2 \
     mpd2==3.1.0 \
     rarfile==4.1 \
     jellyfish==1.0.1 \
