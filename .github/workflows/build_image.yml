@@ -175,7 +175,7 @@ jobs:
 
       - name: Create GitHub Release
         if: ${{ github.event_name == 'push' && needs.check_beets_version.outputs.version_changed == 'true' }}
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           name: Beets v${{ steps.version_tag.outputs.beets_version }} Docker Image
           tag_name: v${{ steps.version_tag.outputs.beets_version }}
