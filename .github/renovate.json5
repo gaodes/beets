@@ -17,7 +17,6 @@
     "docker-compose",
     "dockerfile",
     "github-actions",
-    "regex",
     "pip_requirements"
   ],
   "timezone": "Europe/Bucharest",
@@ -43,31 +42,21 @@
   "platformAutomerge": true,
   "recreateWhen": "always",
   "prCreation": "immediate",
-  "regexManagers": [
+  "packageRules": [
     {
-      "fileMatch": ["^Dockerfile$"],
-      "matchStrings": [
-        "\\s+(?<depName>[\\w-]+)~=(?<currentValue>[\\d.]+(?:-r\\d+)?)"
-      ],
-      "datasourceTemplate": "repology",
-      "registryUrlTemplate": "https://pkgs.alpinelinux.org",
-      "lookupNameTemplate": "alpine_edge/{{depName}}",
-      "depTypeTemplate": "alpine-package"
+      "matchDatasources": ["docker"],
+      "matchUpdateTypes": ["major", "minor", "patch"],
+      "enabled": true
     },
     {
-      "fileMatch": ["^Dockerfile$"],
-      "matchStrings": [
-        "ENV [^\\n]*\\b(?<depName>\\w+)=(?<currentValue>\\d+)\\b"
-      ],
-      "datasourceTemplate": "docker",
-      "depTypeTemplate": "env-variable"
+      "matchDatasources": ["pypi"],
+      "matchUpdateTypes": ["major", "minor", "patch"],
+      "enabled": true
     },
     {
-      "fileMatch": ["^Dockerfile$"],
-      "matchStrings": [
-        "pip install --no-cache-dir[^\\n]*\\s+(?<depName>[^\\s#=]+)==(?<currentValue>[^\\s]+)"
-      ],
-      "datasourceTemplate": "pypi"
+      "matchPackagePatterns": ["^python$"],
+      "matchDatasources": ["docker"],
+      "allowedVersions": "<3.14"
     }
   ]
 }

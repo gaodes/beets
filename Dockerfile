@@ -6,16 +6,16 @@ RUN mkdir -p $PIP_CACHE_DIR
 
 # Install build dependencies
 RUN apk add --no-cache \
-    build-base~=0.5 \
-    libffi-dev~=3.4 \
-    chromaprint-dev~=1.5 \
-    imagemagick-dev~=7.1 \
-    py3-pip~=23.0 \
-    git~=2.40 \
-    cmake~=3.27 \
-    taglib-dev~=1.13 \
-    boost-dev~=1.82 \
-    fftw-dev~=3.3
+    build-base=0.5.3-r5 \
+    libffi-dev=3.4.4-r2 \
+    chromaprint-dev=1.5.1-r3 \
+    imagemagick-dev=7.1.1.21-r0 \
+    py3-pip=23.3.1-r0 \
+    git=2.40.1-r0 \
+    cmake=3.27.8-r0 \
+    taglib-dev=1.13.1-r1 \
+    boost-dev=1.82.0-r4 \
+    fftw-dev=3.3.10-r2
 
 # Install Python packages
 # NOTE: The beets version line below is the source of truth and is updated by Renovate
@@ -94,30 +94,30 @@ ENV BEETSDIR="/config" \
 
 # Install runtime dependencies with version pinning
 RUN apk add --no-cache \
-    ffmpeg~=6.0 \
-    flac~=1.4 \
-    lame~=3.100 \
-    opus-tools~=0.2 \
-    chromaprint~=1.5 \
-    imagemagick~=7.1 \
-    nano~=7.2 \
-    sqlite~=3.43 \
-    su-exec~=0.2 \
-    shadow~=4.13 \
-    tzdata~=2023 \
-    mpd~=0.23 \
-    mpc~=0.34 \
-    unrar~=6.2 \
-    mp3gain~=1.6 \
-    py3-pip~=23.0 \
-    git~=2.40 \
-    fftw~=3.3 \
-    taglib~=1.13 \
-    boost~=1.82 \
-    sox~=14.4 \
-    keyfinder~=2.2 \
-    curl~=8.4 \
-    jq~=1.7 \
+    ffmpeg=6.0.1-r2 \
+    flac=1.4.3-r0 \
+    lame=3.100-r5 \
+    opus-tools=0.2.1-r1 \
+    chromaprint=1.5.1-r3 \
+    imagemagick=7.1.1.21-r0 \
+    nano=7.2-r1 \
+    sqlite=3.43.2-r0 \
+    su-exec=0.2-r3 \
+    shadow=4.13.2-r0 \
+    tzdata=2023d-r0 \
+    mpd=0.23.13-r3 \
+    mpc=0.34-r1 \
+    unrar=6.2.12-r0 \
+    mp3gain=1.6.2-r2 \
+    py3-pip=23.3.1-r0 \
+    git=2.40.1-r0 \
+    fftw=3.3.10-r2 \
+    taglib=1.13.1-r1 \
+    boost=1.82.0-r4 \
+    sox=14.4.2-r10 \
+    keyfinder=2.2.6-r2 \
+    curl=8.4.0-r0 \
+    jq=1.7.1-r0 \
     && pip install --no-cache-dir aubio==0.4.9
 
 # Copy Python packages from builder stage
