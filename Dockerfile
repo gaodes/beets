@@ -73,7 +73,7 @@ RUN pip install --no-cache-dir --prefix=/install \
     beets-xtractor==0.5.0 \
     # Recommended additional plugins
     beets-autofix==0.1.6 \
-    beets-follow==0.1.2 \
+    beets-follow==1.1.0 \
     beets-originquery==0.1.1 \
     beets-check==0.15.0 \
     # Supporting libraries
