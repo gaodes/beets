@@ -45,7 +45,7 @@ RUN pip install --no-cache-dir --prefix=/install \
     jellyfish==1.0.1 \
     pillow==10.2.0 \
     pyxdg==0.28 \
-    pyyaml==6.0.1 \
+    pyyaml==6.0.2 \
     typing-extensions==4.8.0 \
     responses==0.24.1 \
     xmltodict==0.13.0 \
