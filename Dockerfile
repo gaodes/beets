@@ -1,11 +1,12 @@
-FROM python:3.12-alpine AS builder
+FROM python:3.11-alpine AS builder
 
 # Setup pip cache for faster builds
 ENV PIP_CACHE_DIR=/var/cache/pip
 RUN mkdir -p $PIP_CACHE_DIR
 
-# Install build dependencies
-RUN apk add --no-cache \
+# Install build dependencies with improved error handling
+RUN apk update && \
+    apk add --no-cache \
     build-base \
     libffi-dev \
     chromaprint-dev \
@@ -27,20 +28,21 @@ RUN apk add --no-cache \
     linux-headers \
     musl-dev
 
-# Install Python packages in smaller batches for better error handling
-# Core packages
-RUN pip install --no-cache-dir --prefix=/install \
-    beets==2.3.0 \
-    requests \
-    pyyaml \
-    mutagen \
-    unidecode \
-    munkres \
-    mediafile==0.13.0 \
-    reflink \
-    jellyfish \
-    confuse \
-    typing-extensions
+# Install core packages individually with verbose output
+RUN pip install --verbose --no-cache-dir --prefix=/install beets==2.3.0 && \
+    pip install --verbose --no-cache-dir --prefix=/install requests && \
+    pip install --verbose --no-cache-dir --prefix=/install pyyaml && \
+    pip install --verbose --no-cache-dir --prefix=/install mutagen && \
+    pip install --verbose --no-cache-dir --prefix=/install unidecode && \
+    pip install --verbose --no-cache-dir --prefix=/install munkres && \
+    pip install --verbose --no-cache-dir --prefix=/install mediafile==0.13.0 && \
+    pip install --verbose --no-cache-dir --prefix=/install jellyfish && \
+    pip install --verbose --no-cache-dir --prefix=/install confuse && \
+    pip install --verbose --no-cache-dir --prefix=/install typing-extensions && \
+    echo "Core packages installed successfully"
+
+# Try to install reflink separately (this might be problematic)
+RUN pip install --verbose --no-cache-dir --prefix=/install reflink || echo "Warning: reflink couldn't be installed"
 
 # Install metadata plugins one by one with verbose output
 RUN pip install --no-cache-dir --prefix=/install pylast && \
@@ -95,7 +97,7 @@ RUN pip install --no-cache-dir --prefix=/install beets-follow || echo "Warning: 
 RUN pip install --no-cache-dir --prefix=/install essentia || echo "Warning: essentia couldn't be installed - will have reduced functionality"
 
 # Final image
-FROM python:3.12-alpine
+FROM python:3.11-alpine
 
 # Create user and group - using dynamic IDs to avoid conflicts
 RUN addgroup -S appgroup && \
@@ -110,7 +112,8 @@ ENV BEETSDIR="/config" \
     TZ=UTC
 
 # Install runtime dependencies - basic package groups
-RUN apk add --no-cache \
+RUN apk update && \
+    apk add --no-cache \
     ffmpeg \
     flac \
     lame \
@@ -171,7 +174,7 @@ LABEL maintainer="gaodes" \
       org.opencontainers.image.created="$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
       org.opencontainers.image.title="Beets Music Organizer" \
       org.opencontainers.image.vendor="gaodes" \
-      org.opencontainers.image.base.name="python:3.12-alpine"
+      org.opencontainers.image.base.name="python:3.11-alpine"
 
 # Create only the base directories
 RUN mkdir -p /config /data
