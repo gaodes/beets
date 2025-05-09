@@ -67,12 +67,15 @@ This Docker image includes a comprehensive set of Beets plugins:
 - **bandcamp**: Use Bandcamp as a metadata source
 - **beatport**: Use Beatport as a metadata source
 - **creditflags**: Credit handling for performers
+- **originquery**: Augment MusicBrainz queries with locally-sourced data
+- **metasync**: Fetch metadata from local or remote sources
 
 ### Audio Analysis
 - **keyfinder**: Detect musical key of tracks
 - **acoustid**: Audio fingerprinting using the Acoustid service
 - **bpm**: Tempo (beats per minute) detection
 - **replaygain**: Calculate and store ReplayGain values
+- **audiofeatures**: Extract audio features for analysis
 
 ### Library Management
 - **duplicates**: Find and manage duplicate tracks
@@ -84,6 +87,9 @@ This Docker image includes a comprehensive set of Beets plugins:
 - **fromfilename**: Generate metadata from filenames
 - **filefilter**: Filter files during import
 - **extrafiles**: Manage non-music files
+- **describe**: Detailed reporting on library attributes
+- **follow**: Check for new albums from favorite artists
+- **check**: Verify file integrity
 
 ### Integration
 - **web**: Web interface for your library
@@ -92,10 +98,16 @@ This Docker image includes a comprehensive set of Beets plugins:
 - **smartplaylist**: Generate playlists based on queries
 - **playlist**: Maintain playlists based on queries
 - **hook**: Run commands when events occur
+- **playlistensure**: Ensure playlists are properly maintained
+- **rewritestyles**: Rewrite style tags
 
 ### Conversion and Processing
 - **convert**: Convert audio files to other formats
 - **inline**: Extract embedded information from filenames
+- **fetchattrs**: Fetch additional attributes for tracks
+- **xtractor**: Extract musical features from audio
+- **autofix**: Automatically fix common issues in your library
+- **djtools**: Tools for DJs to organize their music libraries
 
 ## Common Commands
 
@@ -150,20 +162,47 @@ lastgenre:
 
 This project uses Renovate for automatic dependency updates. The Renovate configuration will:
 
-- Monitor for new versions of Beets and its dependencies
+- Monitor for new versions of Beets, Python packages, and Alpine packages
 - Create pull requests for dependency updates
 - Automatically merge non-breaking updates
 - Tag new versions based on dependency changes
 
+The Renovate configuration in `.github/renovate.json5` includes:
+
+- Package rules for Docker, PyPI, and Alpine packages
+- Special handling for custom plugins and packages not in PyPI
+- Automatic detection of package versions in the Dockerfile
+- Semantic commit messages for dependency updates
+
+If you see warnings about package lookup failures for custom plugins (like `beets-*` packages), these are expected as many of these plugins are custom or not available in public repositories.
+
 ## Upgrading
 
-When a new Beets version is released:
+Renovate will automatically create pull requests when new versions of dependencies are available. The configuration is set to:
 
-1. Update the version in the Dockerfile
-2. Rebuild the image
+- Update the Python base image (currently `python:3.13-alpine`)
+- Update all Alpine packages with their specific versions
+- Update PyPI packages that are available in the public repository
+
+When a new version is released:
+
+1. The GitHub Actions workflow will automatically build and push the new image when changes are merged
+2. Pull the latest image and restart your container:
 
 ```bash
+docker-compose pull
+docker-compose up -d
+```
+
+### Manual Upgrade
+
+If you need to manually upgrade:
+
+```bash
+# Rebuild the image
 docker-compose build --no-cache
+
+# Restart the container with the new image
 docker-compose up -d
 ```
 
@@ -193,11 +232,43 @@ RUN pip install --no-cache-dir \
     additional-package
 ```
 
+## Dependency Management
+
+### Package Versioning
+
+All dependencies in the Dockerfile are version-pinned for better stability and reproducibility:
+
+- **Python Base Image**: Currently using `python:3.13-alpine`
+- **Alpine Packages**: All Alpine packages are pinned with specific versions (e.g., `ffmpeg=6.0.1-r2`)
+- **Python Packages**: All Python packages are pinned with specific versions (e.g., `beets==2.3.0`)
+
+### Custom and Third-Party Plugins
+
+Some plugins used in this image are not available on PyPI, including:
+- `keyfinder-cli`: A CLI wrapper for libkeyfinder
+- `mpd2`: A Python client for the Music Player Daemon
+- Various `beets-*` plugins that are community-maintained
+
+These packages are excluded from Renovate's automatic updates but are still installed from their respective sources.
+
+### Renovate Configuration
+
+Our Renovate setup is configured to:
+1. Detect and update Python and Alpine packages in the Dockerfile
+2. Ignore packages that aren't available on PyPI
+3. Apply specific package rules for different datasources
+4. Use regex patterns to identify package versions in various formats
+
+The configuration is in `.github/renovate.json5` and includes detailed package rules and regex managers.
+
 ## Resources
 
 - [Beets Documentation](https://beets.readthedocs.io/)
+- [Beets GitHub Repository](https://github.com/beetbox/beets)
 - [Docker Hub Repository](https://hub.docker.com/r/gaodes/beets)
-- [GitHub Repository](https://github.com/gaodes/beets)
+- [GitHub Container Registry](https://github.com/gaodes/beets/pkgs/container/beets)
+- [Renovate Documentation](https://docs.renovatebot.com/)
+- [Custom Beets Plugins List](https://beets.readthedocs.io/en/stable/plugins/index.html#other-plugins)
 
 ## Contributing
 
