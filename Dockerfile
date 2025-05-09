@@ -37,7 +37,7 @@ RUN pip install --no-cache-dir --prefix=/install \
     # General dependencies
     requests==2.32.3 \
     mutagen==1.47.0 \
-    beautifulsoup4==4.12.3 \
+    beautifulsoup4==4.13.4 \
     confuse==2.0.1 \
     reflink==0.2.2 \
     mpd2==3.1.0 \
