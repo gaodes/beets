@@ -51,7 +51,7 @@
       ],
       "datasourceTemplate": "repology",
       "registryUrlTemplate": "https://pkgs.alpinelinux.org",
-      "lookupNameTemplate": "alpine_3_18/{{depName}}",
+      "lookupNameTemplate": "alpine_edge/{{depName}}",
       "depTypeTemplate": "alpine-package"
     },
     {
