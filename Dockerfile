@@ -41,7 +41,7 @@ RUN pip install --no-cache-dir --prefix=/install \
     confuse==2.0.1 \
     reflink==0.2.2 \
     mpd2==3.1.0 \
-    rarfile==4.1 \
+    rarfile==4.2 \
     jellyfish==1.2.0 \
     pillow==10.4.0 \
     pyxdg==0.28 \
