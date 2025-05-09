@@ -43,7 +43,7 @@ RUN pip install --no-cache-dir --prefix=/install \
     mpd2==3.1.0 \
     rarfile==4.2 \
     jellyfish==1.2.0 \
-    pillow==10.4.0 \
+    pillow==11.2.1 \
     pyxdg==0.28 \
     pyyaml==6.0.2 \
     typing-extensions==4.13.2 \
@@ -73,7 +73,7 @@ RUN pip install --no-cache-dir --prefix=/install \
     beets-xtractor==0.5.0 \
     # Recommended additional plugins
     beets-autofix==0.1.6 \
-    beets-follow==0.1.2 \
+    beets-follow==1.1.0 \
     beets-originquery==0.1.1 \
     beets-check==0.15.0 \
     # Supporting libraries
