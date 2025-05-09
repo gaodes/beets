@@ -77,7 +77,7 @@ RUN pip install --no-cache-dir --prefix=/install \
     beets-originquery==0.1.1 \
     beets-check==0.15.0 \
     # Supporting libraries
-    spotipy==2.23.0 \
+    spotipy==2.25.1 \
     py-sonic==1.0.3 \
     essentia==2.1b6.dev1234
 
