@@ -48,7 +48,7 @@ RUN pip install --no-cache-dir --prefix=/install \
     pyyaml==6.0.2 \
     typing-extensions==4.13.2 \
     responses==0.25.7 \
-    xmltodict==0.13.0 \
+    xmltodict==0.14.2 \
     mediafile==0.13.0 \
     unidecode==1.4.0 \
     munkres==1.1.4 \
