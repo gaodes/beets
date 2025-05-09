@@ -17,7 +17,8 @@
     "docker-compose",
     "dockerfile",
     "github-actions",
-    "pip_requirements"
+    "pip_requirements",
+    "regex"
   ],
   "timezone": "Europe/Bucharest",
   "dependencyDashboard": true,
@@ -52,6 +53,33 @@
       "matchDatasources": ["pypi"],
       "matchUpdateTypes": ["major", "minor", "patch"],
       "enabled": true
+    },
+    {
+      "description": "Match Alpine packages in Dockerfile",
+      "matchDatasources": ["repology"],
+      "matchPackagePatterns": [".*"],
+      "matchDepTypes": ["alpine_package"],
+      "enabled": true
+    }
+  ],
+  "regexManagers": [
+    {
+      "fileMatch": ["^Dockerfile$"],
+      "matchStrings": [
+        "apk add --no-cache [\\s\\S]*?(?<depName>[a-z0-9-]+)=(?<currentValue>[\\d\\.]+(-r\\d+))"
+      ],
+      "datasourceTemplate": "repology",
+      "depNameTemplate": "{{{depName}}}",
+      "packageNameTemplate": "alpine_3_18/{{{depName}}}",
+      "versioningTemplate": "loose"
+    },
+    {
+      "fileMatch": ["^Dockerfile$"],
+      "matchStrings": [
+        "\\s+(?<depName>[a-zA-Z0-9_-]+)==(?<currentValue>[\\d\\.]+)\\s*\\\\"
+      ],
+      "datasourceTemplate": "pypi",
+      "versioningTemplate": "pep440"
     }
   ]
 }
