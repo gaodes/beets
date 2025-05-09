@@ -1,4 +1,4 @@
-FROM python:3.11-alpine AS builder
+FROM python:3.12-alpine AS builder
 
 # Setup pip cache for faster builds
 ENV PIP_CACHE_DIR=/var/cache/pip
@@ -97,7 +97,7 @@ RUN pip install --no-cache-dir --prefix=/install beets-follow || echo "Warning: 
 RUN pip install --no-cache-dir --prefix=/install essentia || echo "Warning: essentia couldn't be installed - will have reduced functionality"
 
 # Final image
-FROM python:3.11-alpine
+FROM python:3.12-alpine
 
 # Create user and group - using dynamic IDs to avoid conflicts
 RUN addgroup -S appgroup && \
