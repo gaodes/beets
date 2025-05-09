@@ -86,7 +86,7 @@ FROM python:3.13-alpine
 
 # Add after the FROM line in the final stage
 RUN addgroup -g 100 -S appgroup && \
-    adduser -u 99 -S appuser -G appgroup -s /bin/sh
+    adduser -u 99 -S appuser -G appgroup -h /home/appuser -s /bin/sh
 
 # Set environment variables
 ENV BEETSDIR="/config" \
@@ -158,26 +158,26 @@ RUN echo '#!/bin/sh\n\
 set -e\n\
 \n\
 # Create user with specified PUID/PGID if needed\n\
-if [ ! "$(id -u nobody 2>/dev/null || echo no)" = "$PUID" ]; then\n\
-    # User nobody exists but with wrong PUID, modify it\n\
-    if getent passwd nobody > /dev/null; then\n\
-        usermod -o -u "$PUID" nobody\n\
+if [ ! "$(id -u appuser 2>/dev/null || echo no)" = "$PUID" ]; then\n\
+    # User appuser exists but with wrong PUID, modify it\n\
+    if getent passwd appuser > /dev/null; then\n\
+        usermod -o -u "$PUID" appuser\n\
     else\n\
         # Create the user if it does not exist\n\
-        adduser -D -u "$PUID" -s /bin/sh nobody\n\
+        adduser -D -u "$PUID" -s /bin/sh appuser\n\
     fi\n\
     # Set PGID\n\
-    if [ ! "$(id -g nobody)" -eq "$PGID" ]; then\n\
-        groupmod -o -g "$PGID" nobody\n\
+    if [ ! "$(id -g appuser)" -eq "$PGID" ]; then\n\
+        groupmod -o -g "$PGID" appuser\n\
     fi\n\
 fi\n\
 \n\
 # Make sure the user can access the config and data directories\n\
-chown -R nobody:nobody /config\n\
-chown nobody:nobody /data\n\
+chown -R appuser:appgroup /config\n\
+chown appuser:appgroup /data\n\
 \n\
-# Run the command as the nobody user\n\
-exec su-exec nobody "$@"' > /entrypoint.sh && \
+# Run the command as the appuser user\n\
+exec su-exec appuser "$@"' > /entrypoint.sh && \
     chmod +x /entrypoint.sh
 
 # Add healthcheck with improved parameters
@@ -195,4 +195,4 @@ CMD ["beet", "web"]
 VOLUME ["/config", "/data"]
 
 # Run most operations as appuser instead of root
-USER appuser
+# USER appuser
