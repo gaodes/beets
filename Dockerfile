@@ -75,7 +75,7 @@ RUN pip install --no-cache-dir --prefix=/install \
     beets-autofix==0.1.6 \
     beets-follow==0.1.2 \
     beets-originquery==0.1.1 \
-    beets-check==0.12.0 \
+    beets-check==0.15.0 \
     # Supporting libraries
     spotipy==2.23.0 \
     py-sonic==1.0.3 \
