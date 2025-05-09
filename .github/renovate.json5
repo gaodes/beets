@@ -60,6 +60,33 @@
       "matchPackagePatterns": [".*"],
       "matchDepTypes": ["alpine_package"],
       "enabled": true
+    },
+    {
+      "description": "Ignore packages that aren't available on PyPI",
+      "matchDatasources": ["pypi"],
+      "matchPackageNames": [
+        "keyfinder-cli",
+        "mpd2",
+        "beets-beatport",
+        "beets-albumtypes",
+        "beets-creditflags",
+        "beets-keyfinder",
+        "beets-metasync",
+        "beets-playlistensure",
+        "beets-rewritestyles",
+        "beets-fetchattrs",
+        "beets-audiofeatures",
+        "beets-djtools",
+        "beets-originquery"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Fix for mpd2 package (actual name is python-mpd2)",
+      "matchDatasources": ["pypi"],
+      "matchPackageNames": ["mpd2"],
+      "packageNames": ["python-mpd2"],
+      "enabled": false
     }
   ],
   "regexManagers": [
@@ -76,7 +103,17 @@
     {
       "fileMatch": ["^Dockerfile$"],
       "matchStrings": [
-        "\\s+(?<depName>[a-zA-Z0-9_-]+)==(?<currentValue>[\\d\\.]+)\\s*\\\\"
+        "\\s+(?<depName>[a-zA-Z0-9_-]+)==(?<currentValue>[\\d\\.]+)(?:\\s*\\\\|\\s*$)",
+        "\\s+pip install --no-cache-dir (?<depName>[a-zA-Z0-9_-]+)==(?<currentValue>[\\d\\.]+)\\s+"
+      ],
+      "datasourceTemplate": "pypi",
+      "versioningTemplate": "pep440"
+    },
+    {
+      "description": "Custom GitHub repositories for Python packages",
+      "fileMatch": ["^Dockerfile$"],
+      "matchStrings": [
+        "\\s+(?<depName>beets-[a-zA-Z0-9_-]+)==(?<currentValue>[\\d\\.]+)(?:\\s*\\\\|\\s*$)"
       ],
       "datasourceTemplate": "pypi",
       "versioningTemplate": "pep440"
