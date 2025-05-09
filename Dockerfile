@@ -78,7 +78,7 @@ RUN pip install --no-cache-dir --prefix=/install \
     beets-check==0.12.0 \
     # Supporting libraries
     spotipy==2.23.0 \
-    py-sonic==1.0.0 \
+    py-sonic==1.0.3 \
     essentia==2.1b6.dev1234
 
 # Final image
