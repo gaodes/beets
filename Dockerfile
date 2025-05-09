@@ -84,9 +84,9 @@ RUN pip install --no-cache-dir --prefix=/install \
 # Final image
 FROM python:3.13-alpine
 
-# Add after the FROM line in the final stage
+# Create user and group
 RUN addgroup -g 100 -S appgroup && \
-    adduser -u 99 -S appuser -G appgroup -h /home/appuser -s /bin/sh
+    adduser -u 99 -S appuser -G appgroup -s /bin/sh
 
 # Set environment variables
 ENV BEETSDIR="/config" \
