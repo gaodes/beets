@@ -84,6 +84,10 @@ RUN pip install --no-cache-dir --prefix=/install \
 # Final image
 FROM python:3.13-alpine
 
+# Add after the FROM line in the final stage
+RUN addgroup -g 100 -S appgroup && \
+    adduser -u 99 -S appuser -G appgroup -s /bin/sh
+
 # Set environment variables
 ENV BEETSDIR="/config" \
     LANG=C.UTF-8 \
@@ -118,7 +122,12 @@ RUN apk add --no-cache \
     keyfinder=2.2.6-r2 \
     curl=8.4.0-r0 \
     jq=1.7.1-r0 \
-    && pip install --no-cache-dir aubio==0.4.9
+    && pip install --no-cache-dir aubio==0.4.9 \
+    # Clean up unnecessary files
+    && find /usr/local \
+        \( -type d -a -name test -o -name tests -o -name '__pycache__' \) \
+        -o \( -type f -a -name '*.pyc' -o -name '*.pyo' \) \
+        -exec rm -rf '{}' + || true
 
 # Copy Python packages from builder stage
 COPY --from=builder /install /usr/local
@@ -184,3 +193,6 @@ CMD ["beet", "web"]
 
 # Define volumes for persistent configuration and library data
 VOLUME ["/config", "/data"]
+
+# Run most operations as appuser instead of root
+USER appuser

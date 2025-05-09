@@ -1,61 +1,36 @@
-version: '3.8'
-
+---
 services:
   beets:
     image: ghcr.io/gaodes/beets:latest
     container_name: beets
-    volumes:
-      - /mnt/user/docker/appdata/beets/config:/config              # Configuration directory
-      - /mnt/user/mediabox:/data      # Main data volume
-    environment:
-      - PUID=99                       # Unraid user ID
-      - PGID=100                      # Unraid group ID
-      - TZ=UTC                        # Timezone (change as needed)
-    ports:
-      - "8337:8337"                   # For web plugin (if enabled)
     restart: unless-stopped
+    # Override the default command if needed
+    # For example, to run the web interface:
+    command: beet web
+    security_opt:
+      - no-new-privileges:true
+      - seccomp=default
     healthcheck:
       test: ["CMD", "beet", "version"]
       interval: 1m
       timeout: 10s
       retries: 3
       start_period: 20s
-    # Override the default command if needed
-    # For example, to run the web interface:
-    command: beet web
-    
-    # Add resource limits to prevent container from using too many resources
-    deploy:
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 512M
-
-  # Add a web UI for easier management of your music library
-  # Uncomment if you want to use Beets Web (different from beets web plugin)
-  # beetsweb:
-  #   image: linuxserver/beets-web:latest
-  #   container_name: beetsweb
-  #   depends_on:
-  #     - beets
-  #   ports:
-  #     - "8080:80"
-  #   volumes:
-  #     - ./config:/config
-  #     - /mnt/user/mediabox:/data
-  #   restart: unless-stopped
-  #   environment:
-  #     - PUID=99
-  #     - PGID=100
-  #     - TZ=UTC
+    networks:
+      - frontend
+      - backend
+    ports:
+      - 8337:8337
+    environment:
+      PUID: 99
+      PGID: 100
+      TZ: Europe/Bucharest
+    volumes:
+      - /mnt/user/docker/appdata/beets/config:/config 
+      - /mnt/user/mediabox:/data
 
 networks:
-  default:
-    name: beets_network
-
-# Add named volumes for better data management
-volumes:
-  config:
-    driver: local
-  data:
-    driver: local
+  frontend:
+    external: true  
+  backend:
+    external: true
