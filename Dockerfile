@@ -84,9 +84,9 @@ RUN pip install --no-cache-dir --prefix=/install \
 # Final image
 FROM python:3.13-alpine
 
-# Create user and group
-RUN addgroup -g 100 -S appgroup && \
-    adduser -u 99 -S appuser -G appgroup -s /bin/sh
+# Create user and group - using dynamic IDs to avoid conflicts
+RUN addgroup -S appgroup && \
+    adduser -S appuser -G appgroup -s /bin/sh
 
 # Set environment variables
 ENV BEETSDIR="/config" \
@@ -159,26 +159,24 @@ WORKDIR /config
 RUN echo '#!/bin/sh\n\
 set -e\n\
 \n\
-# Create user with specified PUID/PGID if needed\n\
-if [ ! "$(id -u appuser 2>/dev/null || echo no)" = "$PUID" ]; then\n\
-    # User appuser exists but with wrong PUID, modify it\n\
-    if getent passwd appuser > /dev/null; then\n\
-        usermod -o -u "$PUID" appuser\n\
-    else\n\
-        # Create the user if it does not exist\n\
-        adduser -D -u "$PUID" -s /bin/sh appuser\n\
-    fi\n\
-    # Set PGID\n\
-    if [ ! "$(id -g appuser)" -eq "$PGID" ]; then\n\
-        groupmod -o -g "$PGID" appuser\n\
-    fi\n\
+# Get the current IDs for appuser\n\
+CURRENT_UID=$(id -u appuser)\n\
+CURRENT_GID=$(id -g appuser)\n\
+\n\
+# Update user/group IDs if needed\n\
+if [ ! "$CURRENT_UID" = "$PUID" ]; then\n\
+    usermod -o -u "$PUID" appuser\n\
 fi\n\
 \n\
-# Make sure the user can access the config and data directories\n\
+if [ ! "$CURRENT_GID" = "$PGID" ]; then\n\
+    groupmod -o -g "$PGID" appgroup\n\
+fi\n\
+\n\
+# Make sure the user can access the directories\n\
 chown -R appuser:appgroup /config\n\
 chown appuser:appgroup /data\n\
 \n\
-# Run the command as the appuser user\n\
+# Run the command as the appuser\n\
 exec su-exec appuser "$@"' > /entrypoint.sh && \
     chmod +x /entrypoint.sh
 
