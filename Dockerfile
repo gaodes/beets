@@ -33,7 +33,7 @@ RUN pip install --no-cache-dir --prefix=/install \
     librosa==0.11.0 \
     # Integration
     flask==3.1.0 \
-    plexapi==4.15.4 \
+    plexapi==4.17.0 \
     # General dependencies
     requests==2.32.3 \
     mutagen==1.47.0 \
